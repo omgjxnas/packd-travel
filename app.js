@@ -385,7 +385,7 @@ function App() {
   const [nlName, setNlName] = useState('');
   const [nlEmail, setNlEmail] = useState('');
   const [nlDone, setNlDone] = useState(false);
-  const [nlCanUndo, setNlCanUndo] = useState(false);
+  const [nlJustSubscribed, setNlJustSubscribed] = useState(false);
   const [addedId, setAddedId] = useState(null);
   const [popupOpen, setPopupOpen] = useState(false);
   const [tabVisible, setTabVisible] = useState(false);
@@ -530,17 +530,17 @@ function App() {
     e.preventDefault();
     if (!nlEmail) return;
     setNlDone(true);
-    setNlCanUndo(false);
+    setNlJustSubscribed(true);
     setPopupOpen(false);
     setTabVisible(false);
     setPopupDone(false);
     clearTimeout(undoTimerRef.current);
-    undoTimerRef.current = setTimeout(() => setNlCanUndo(true), 1100);
+    undoTimerRef.current = setTimeout(() => setNlJustSubscribed(false), 2000);
   };
 
   const unsubscribeNewsletter = () => {
     setNlDone(false);
-    setNlCanUndo(false);
+    setNlJustSubscribed(false);
     clearTimeout(undoTimerRef.current);
   };
 
@@ -777,22 +777,21 @@ function App() {
                 disabled={nlDone}
               />
               <div className="nl-actions">
-                <button className={`nl-btn ${nlDone ? 'is-done' : ''}`} type="submit" disabled={nlDone}>
+                <button
+                  className={`nl-btn ${nlJustSubscribed ? 'is-success' : ''} ${nlDone && !nlJustSubscribed ? 'is-secondary' : ''}`}
+                  type={nlDone && !nlJustSubscribed ? 'button' : 'submit'}
+                  onClick={nlDone && !nlJustSubscribed ? unsubscribeNewsletter : undefined}
+                >
                   <span className="nl-btn-label">
-                    {nlDone ? (
+                    {nlJustSubscribed ? (
                       <>
-                        <span className="nl-btn-check">✓</span>
+                        <span className="nl-btn-check" aria-hidden="true">
+                          <span className="material-symbols-outlined">check</span>
+                        </span>
                         Odebráno
                       </>
-                    ) : 'Odebírat novinky'}
+                    ) : nlDone ? 'Zrušit odběr' : 'Odebírat novinky'}
                   </span>
-                </button>
-                <button
-                  className={`nl-btn-secondary ${nlCanUndo ? 'visible' : ''}`}
-                  type="button"
-                  onClick={unsubscribeNewsletter}
-                >
-                  Zrušit odběr
                 </button>
               </div>
               <span className="nl-note">
@@ -920,7 +919,13 @@ function App() {
             <span className="cart-total-label">CELKEM</span>
             <span className="cart-total-price">{cartTotal.toLocaleString('cs-CZ')} Kč</span>
           </div>
-          <button className="cart-checkout-btn">POKLADNA</button>
+          <button className="cart-checkout-btn">
+            <span className="cart-checkout-copy">
+              <span className="cart-checkout-label">Pokračovat k pokladně</span>
+              <span className="cart-checkout-sub">Bezpečná platba a doprava v dalším kroku</span>
+            </span>
+            <span className="cart-checkout-arrow" aria-hidden="true">→</span>
+          </button>
           <span className="cart-tax-note">Daně zahrnuty. Doprava se vypočítá při pokladně.</span>
         </div>
       </div>

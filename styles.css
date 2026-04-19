@@ -1205,12 +1205,27 @@
   .nl-popup-code.copied .code-label { transform: translateY(-120%); opacity: 0; }
   .nl-popup-code .code-check {
     top: 50%; transform: translateY(calc(-50% + 30px));
-    opacity: 0; font-size: 15px; letter-spacing: 0.1em;
+    opacity: 0;
+    font-size: 15px;
+    letter-spacing: 0.1em;
     font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
   }
   .nl-popup-code.copied .code-check {
     transform: translateY(-50%);
     opacity: 1;
+  }
+  .nl-popup-code .code-check .material-symbols-outlined {
+    font-size: 18px;
+    line-height: 1;
+    font-variation-settings:
+      'FILL' 1,
+      'wght' 500,
+      'GRAD' 0,
+      'opsz' 20;
   }
   .nl-popup-tab {
     position: fixed;
@@ -1379,6 +1394,7 @@
     .product-grid {
       display: flex;
       overflow-x: auto;
+      overflow-y: hidden;
       scroll-snap-type: x mandatory;
       scrollbar-width: none;
       gap: 2px;
@@ -1386,12 +1402,16 @@
       margin: 0 -20px;
       padding-left: 20px;
       padding-right: 20px;
+      align-items: flex-start;
+      touch-action: pan-x;
+      overscroll-behavior-x: contain;
     }
     .product-grid::-webkit-scrollbar { display: none; }
     .product-grid .product-card {
       min-width: calc(50vw - 24px);
       flex-shrink: 0;
       scroll-snap-align: start;
+      overflow: hidden;
     }
   }
 

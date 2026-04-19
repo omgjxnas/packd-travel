@@ -958,7 +958,10 @@ function App() {
             <p className="nl-popup-sub nl-popup-subtle">Zkopíruj kód a použij ho při pokladně.</p>
             <div className={`nl-popup-code ${copied ? 'copied' : ''}`} onClick={copyCode}>
               <span className="code-label">PACKD10</span>
-              <span className="code-check">✓ Zkopírováno</span>
+              <span className="code-check">
+                <span className="material-symbols-outlined" aria-hidden="true">check</span>
+                <span>Zkopírováno</span>
+              </span>
             </div>
             <p className="nl-popup-note nl-popup-note-fade" style={{ opacity: copied ? 0 : 1 }}>Klikni pro zkopírování</p>
             <button className="nl-popup-btn nl-popup-btn-spaced" onClick={closePopup}>Jít nakupovat</button>

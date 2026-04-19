@@ -222,11 +222,11 @@ function SearchOverlay({ open, onClose, onSelectProduct, products, topProducts }
   );
 }
 
-function ProductDetail({ product, onClose, onAddToCart }) {
+function ProductDetail({ product, onClose, onAddToCart, onSelectProduct }) {
   const allImgs = product ? product.imgs : [];
   const [imgIdx, setImgIdx] = useState(0);
   const [selSize, setSelSize] = useState(null);
-  const [openAcc, setOpenAcc] = useState('details');
+  const [openAcc, setOpenAcc] = useState(null);
   const closeButtonRef = React.useRef(null);
 
   useOverlayFocus(Boolean(product), closeButtonRef);
@@ -243,6 +243,11 @@ function ProductDetail({ product, onClose, onAddToCart }) {
 
   const sizes = product.sizes || ['XS', 'S', 'M', 'L', 'XL'];
   const unavail = ['XL'];
+  const relatedProducts = [...products, ...topProducts].filter((p) => p.id !== product.id).slice(0, 4);
+  const colorSwatches = [
+    { label: 'Růžová', value: 'oklch(82% 0.09 10)' },
+    { label: 'Hnědá', value: 'oklch(42% 0.05 40)' }
+  ];
 
   const accordions = [
     { id: 'details', label: 'Detail produktu', content: `Prémiový packing cube vyrobený z lehkého ripstop nylonu. Dvojitý kompresní zip umožňuje maximální využití prostoru. Integrovaná síťovaná kapsa pro snadný přehled obsahu. Model ${product.name}.` },
@@ -253,120 +258,221 @@ function ProductDetail({ product, onClose, onAddToCart }) {
   return (
     <div className={`pd-overlay ${product ? 'open' : ''}`} onClick={onClose}>
       <div className="pd-nav" onClick={(e) => e.stopPropagation()}>
-        <div className="pd-breadcrumb">Kolekce &rsaquo; <span>{product.name}</span></div>
-        <button ref={closeButtonRef} className="pd-close" onClick={onClose}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-          Zavřít
-        </button>
+        <div className="nav-logo nav-logo-tight">PACKD®</div>
+        <ul className="nav-links pd-nav-links">
+          <li><a href="#">Kolekce</a></li>
+          <li><a href="#">Sety</a></li>
+          <li><a href="#">O nás</a></li>
+        </ul>
+        <div className="nav-actions pd-nav-actions">
+          <button className="nav-icon" title="Hledat">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <circle cx="11" cy="11" r="7" />
+              <line x1="16.5" y1="16.5" x2="22" y2="22" />
+            </svg>
+          </button>
+          <button className="nav-icon" title="Účet">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+            </svg>
+          </button>
+          <button className="nav-icon cart-badge" title="Košík">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <path d="M16 10a4 4 0 01-8 0" />
+            </svg>
+          </button>
+          <button ref={closeButtonRef} className="pd-close" onClick={onClose}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+            Zavřít
+          </button>
+        </div>
       </div>
-      <div className="pd-body" onClick={(e) => e.stopPropagation()}>
-        <div className="pd-images">
-          <div className="pd-main-img">
-            {allImgs.map((src, i) => (
-              <img
-                key={src}
-                src={src}
-                alt={product.name}
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  objectPosition: 'center',
-                  opacity: i === imgIdx ? 1 : 0,
-                  transition: 'opacity .4s'
-                }}
-              />
-            ))}
-            {allImgs.length > 1 && (
-              <>
-                <button className="pd-arrow left" onClick={prev}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <polyline points="15 18 9 12 15 6" />
-                  </svg>
-                </button>
-                <button className="pd-arrow right" onClick={next}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <polyline points="9 18 15 12 9 6" />
-                  </svg>
-                </button>
-              </>
-            )}
+      <div className="pd-scroll" onClick={(e) => e.stopPropagation()}>
+        <div className="pd-body">
+          <div className="pd-images">
+            <div className="pd-media-stick">
+              <div className="pd-main-img">
+                {allImgs.map((src, i) => (
+                  <img
+                    key={src}
+                    src={src}
+                    alt={product.name}
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'contain',
+                      objectPosition: 'center',
+                      opacity: i === imgIdx ? 1 : 0,
+                      transition: 'opacity .4s'
+                    }}
+                  />
+                ))}
+                {allImgs.length > 1 && (
+                  <>
+                    <button className="pd-arrow left" onClick={prev}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                        <polyline points="15 18 9 12 15 6" />
+                      </svg>
+                    </button>
+                    <button className="pd-arrow right" onClick={next}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
+                    </button>
+                  </>
+                )}
+                <div className="pd-thumbs">
+                  {allImgs.map((src, i) => (
+                    <div key={src} className={`pd-thumb ${i === imgIdx ? 'active' : ''}`} onClick={() => setImgIdx(i)}>
+                      <img src={src} alt="" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="pd-thumbs">
-            {allImgs.map((src, i) => (
-              <div key={src} className={`pd-thumb ${i === imgIdx ? 'active' : ''}`} onClick={() => setImgIdx(i)}>
-                <img src={src} alt="" />
+          <div className="pd-info">
+            <div className="pd-info-top">
+              <div className="pd-name">{product.name}</div>
+              <div className="pd-price">{product.price}</div>
+              <div className="pd-section-label">Barva</div>
+              <div className="pd-colors">
+                {colorSwatches.map((swatch, i) => (
+                  <div
+                    key={swatch.label}
+                    className={`pd-color-swatch ${imgIdx === i ? 'active' : ''}`}
+                    onClick={() => setImgIdx(i)}
+                    aria-label={swatch.label}
+                    title={swatch.label}
+                  >
+                    <span className="pd-color-dot" style={{ '--swatch-color': swatch.value }} />
+                  </div>
+                ))}
+              </div>
+              <div className="pd-section-label">Velikost</div>
+              <div className="pd-sizes">
+                {sizes.map((s) => (
+                  <button
+                    key={s}
+                    className={`pd-size-btn ${selSize === s ? 'active' : ''} ${unavail.includes(s) ? 'unavail' : ''}`}
+                    onClick={() => !unavail.includes(s) && setSelSize(s)}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+              <button className="pd-add-btn" onClick={() => { onAddToCart(product.id); onClose(); }}>
+                <span>Přidat do košíku{selSize ? ` — ${selSize}` : ''}</span>
+                <span className="pd-add-price">{product.price}</span>
+              </button>
+            </div>
+            <div className="pd-perks">
+              <div className="pd-perk"><span className="material-symbols-outlined" aria-hidden="true">check</span>Doprava po celém světě</div>
+              <div className="pd-perk"><span className="material-symbols-outlined" aria-hidden="true">check</span>Vrácení do 30 dní bez otázek</div>
+              <div className="pd-perk"><span className="material-symbols-outlined" aria-hidden="true">check</span>Vyrobeno z recyklovaných materiálů</div>
+            </div>
+            <div className="pd-details">
+              <div className="pd-accordion">
+                {accordions.map((a) => (
+                  <div className={`pd-accordion-item ${openAcc === a.id ? 'open' : ''}`} key={a.id}>
+                    <button className="pd-accordion-btn" onClick={() => setOpenAcc(openAcc === a.id ? null : a.id)}>
+                      {a.label}
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        style={{ transform: openAcc === a.id ? 'rotate(45deg)' : 'rotate(0)', transition: 'transform .25s' }}
+                      >
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                      </svg>
+                    </button>
+                    <div className="pd-accordion-content" style={{ maxHeight: openAcc === a.id ? '220px' : '0' }}>
+                      <div className="pd-accordion-copy">{a.content}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <section className="pd-related">
+          <div className="pd-related-head">
+            <span className="section-title">Podobné produkty</span>
+          </div>
+          <div className="pd-related-grid">
+            {relatedProducts.map((p) => (
+              <div className="pd-related-card" key={p.id} onClick={() => onSelectProduct(p)}>
+                <div className="pd-related-img">
+                  <img src={p.imgs[0]} alt={p.name} />
+                </div>
+                <div className="pd-related-info">
+                  <span className="pd-related-name">{p.name}</span>
+                  <span className="pd-related-price">{p.price}</span>
+                </div>
               </div>
             ))}
           </div>
-        </div>
-        <div className="pd-info">
-          <div className="pd-info-top">
-            <div className="pd-name">{product.name}</div>
-            <div className="pd-price">{product.price}</div>
-            <div className="pd-section-label">Barva</div>
-            <div className="pd-colors">
-              {allImgs.slice(0, 3).map((src, i) => (
-                <div key={i} className={`pd-color-swatch ${imgIdx === i ? 'active' : ''}`} onClick={() => setImgIdx(i)}>
-                  <img src={src} alt="" />
-                </div>
-              ))}
+        </section>
+
+        <footer className="pd-footer">
+          <div className="footer-top">
+            <div className="footer-brand">
+              <div className="footer-logo">PACKD®</div>
+              <p className="footer-tagline">Packing cubes navržené pro chytré cestovatele. Lehké, odolné, udržitelné.</p>
+              <div className="footer-social">
+                <a href="#">Instagram</a>
+                <a href="#">TikTok</a>
+                <a href="#">Pinterest</a>
+              </div>
             </div>
-            <div className="pd-section-label">Velikost</div>
-            <div className="pd-sizes">
-              {sizes.map((s) => (
-                <button
-                  key={s}
-                  className={`pd-size-btn ${selSize === s ? 'active' : ''} ${unavail.includes(s) ? 'unavail' : ''}`}
-                  onClick={() => !unavail.includes(s) && setSelSize(s)}
-                >
-                  {s}
-                </button>
-              ))}
+            <div className="footer-col">
+              <h4>Produkty</h4>
+              <ul>
+                <li><a href="#">Novinky</a></li>
+                <li><a href="#">Sety</a></li>
+                <li><a href="#">Kompresia</a></li>
+                <li><a href="#">Mesh Cubes</a></li>
+                <li><a href="#">XL Cubes</a></li>
+              </ul>
             </div>
-            <button className="pd-add-btn" onClick={() => { onAddToCart(product.id); onClose(); }}>
-              <span>Přidat do košíku{selSize ? ` — ${selSize}` : ''}</span>
-              <span className="pd-add-price">{product.price}</span>
-            </button>
-          </div>
-          <div className="pd-perks">
-            <div className="pd-perk">Doprava po celém světě</div>
-            <div className="pd-perk">Vrácení do 30 dní bez otázek</div>
-            <div className="pd-perk">Vyrobeno z recyklovaných materiálů</div>
-          </div>
-          <div className="pd-details">
-            <div className="pd-accordion">
-              {accordions.map((a) => (
-                <div className="pd-accordion-item" key={a.id}>
-                  <button className="pd-accordion-btn" onClick={() => setOpenAcc(openAcc === a.id ? null : a.id)}>
-                    {a.label}
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      style={{ transform: openAcc === a.id ? 'rotate(45deg)' : 'rotate(0)', transition: 'transform .25s' }}
-                    >
-                      <line x1="12" y1="5" x2="12" y2="19" />
-                      <line x1="5" y1="12" x2="19" y2="12" />
-                    </svg>
-                  </button>
-                  <div className="pd-accordion-content" style={{ maxHeight: openAcc === a.id ? '200px' : '0' }}>
-                    {a.content}
-                  </div>
-                </div>
-              ))}
+            <div className="footer-col">
+              <h4>Pomoc</h4>
+              <ul>
+                <li><a href="#">Doprava & vrácení</a></li>
+                <li><a href="#">FAQ</a></li>
+                <li><a href="#">Kontakt</a></li>
+                <li><a href="#">Velikostní průvodce</a></li>
+              </ul>
+            </div>
+            <div className="footer-col">
+              <h4>Společnost</h4>
+              <ul>
+                <li><a href="#">O nás</a></li>
+                <li><a href="#">Udržitelnost</a></li>
+                <li><a href="#">Affiliate</a></li>
+                <li><a href="#">Press</a></li>
+              </ul>
             </div>
           </div>
-        </div>
+          <div className="footer-bottom">
+            <span>© 2026 PACKD. Všechna práva vyhrazena.</span>
+            <span>Ochrana osobních údajů · Obchodní podmínky</span>
+          </div>
+        </footer>
       </div>
     </div>
   );
@@ -408,8 +514,15 @@ function App() {
 
   useEffect(() => {
     const shouldLockScroll = searchOpen || Boolean(selectedProduct) || menuOpen || cartOpen;
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
     document.body.classList.toggle('overlay-open', shouldLockScroll);
-    return () => document.body.classList.remove('overlay-open');
+    document.body.style.paddingRight = shouldLockScroll && scrollbarWidth > 0 ? `${scrollbarWidth}px` : '';
+
+    return () => {
+      document.body.classList.remove('overlay-open');
+      document.body.style.paddingRight = '';
+    };
   }, [searchOpen, selectedProduct, menuOpen, cartOpen]);
 
   useEffect(() => {
@@ -505,6 +618,13 @@ function App() {
   const removeFromCart = (id) => {
     setCartItems((prev) => prev.filter((i) => i.id !== id));
     setCartCount((c) => Math.max(0, c - 1));
+  };
+
+  const openCartItemDetail = (id) => {
+    const product = [...products, ...topProducts].find((x) => x.id === id);
+    if (!product) return;
+    setCartOpen(false);
+    setSelectedProduct(product);
   };
 
   const changeQty = (id, delta) => {
@@ -893,12 +1013,12 @@ function App() {
           <div className="cart-items">
             {cartItems.map((item) => (
               <div className="cart-item" key={item.id}>
-                <div className="cart-item-img">
+                <button className="cart-item-img cart-item-link" onClick={() => openCartItemDetail(item.id)}>
                   <img src={item.img} alt={item.name} />
-                </div>
+                </button>
                 <div className="cart-item-body">
                   <div className="cart-item-row">
-                    <span className="cart-item-name">{item.name}</span>
+                    <button className="cart-item-name cart-item-link" onClick={() => openCartItemDetail(item.id)}>{item.name}</button>
                     <button className="cart-item-remove" onClick={() => removeFromCart(item.id)}>ODSTRANIT</button>
                   </div>
                   <span className="cart-item-variant">{item.variant}</span>
@@ -922,9 +1042,11 @@ function App() {
           <button className="cart-checkout-btn">
             <span className="cart-checkout-copy">
               <span className="cart-checkout-label">Pokračovat k pokladně</span>
-              <span className="cart-checkout-sub">Bezpečná platba a doprava v dalším kroku</span>
             </span>
-            <span className="cart-checkout-arrow" aria-hidden="true">→</span>
+            <span className="cart-checkout-arrow" aria-hidden="true">
+              <span className="cart-checkout-arrow-icon is-current">→</span>
+              <span className="cart-checkout-arrow-icon is-next">→</span>
+            </span>
           </button>
           <span className="cart-tax-note">Daně zahrnuty. Doprava se vypočítá při pokladně.</span>
         </div>
@@ -976,7 +1098,12 @@ function App() {
         </svg>
         −10 % sleva
       </button>
-      <ProductDetail product={selectedProduct} onClose={() => setSelectedProduct(null)} onAddToCart={addToCart} />
+      <ProductDetail
+        product={selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+        onAddToCart={addToCart}
+        onSelectProduct={setSelectedProduct}
+      />
 
       <SearchOverlay
         open={searchOpen}

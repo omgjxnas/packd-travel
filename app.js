@@ -130,6 +130,42 @@ const topProducts = [
   { id: 8, name: 'XL Cestovní set', price: '1 490 Kč', rank: '04', imgs: [img6, img5], sizes: ['M', 'L', 'XL'] }
 ];
 
+const PROFILE_TIERS = [
+  { id: 'explorer', label: 'Explorer', level: 1, min: 0, max: 500, color: 'oklch(62% 0.06 55)' },
+  { id: 'packer', label: 'Packer', level: 2, min: 500, max: 1000, color: 'oklch(58% 0.09 200)' },
+  { id: 'globetrotter', label: 'Globetrotter', level: 3, min: 1000, max: 1500, color: 'oklch(60% 0.12 50)' },
+];
+
+const PROFILE_ORDERS = [
+  { id: '#PK-2041', date: '18. 4. 2026', items: ['Kompresia Cube S', 'Zip Pouch XS'], imgs: [img1, img4], total: '730 Kč', status: 'delivered', pts: 73 },
+  { id: '#PK-1987', date: '3. 3. 2026', items: ['Mesh Cube M'], imgs: [img2], total: '589 Kč', status: 'delivered', pts: 59 },
+  { id: '#PK-1865', date: '12. 1. 2026', items: ['Slim Cube béžový', 'Cestovní set 3-pack'], imgs: [img4, img5], total: '1 979 Kč', status: 'delivered', pts: 198 },
+];
+
+const PROFILE_REWARDS = [
+  { id: 1, name: 'Sleva 50 Kč', pts: 300, img: img6, unlocked: true, desc: 'Jednorázový slevový kód na objednávku.' },
+  { id: 2, name: 'Doprava zdarma', pts: 400, img: img2, unlocked: true, desc: 'Doprava na příští objednávku.' },
+  { id: 3, name: 'Sleva 150 Kč', pts: 700, img: img5, unlocked: false, desc: 'Velký slevový kód.' },
+  { id: 4, name: 'PACKD Zip Pouch', pts: 1200, img: img1, unlocked: false, desc: 'Exkluzivní zip pouch pro členy.' },
+  { id: 5, name: 'Kompresia Cube zdarma', pts: 2000, img: img4, unlocked: false, desc: 'Celý produkt za body.' },
+  { id: 6, name: 'Mystery Box', pts: 3000, img: img6, unlocked: false, desc: 'Překvapení od PACKD.' },
+];
+
+const PROFILE_HISTORY = [
+  { date: '18. 4. 2026', type: 'Nákup', action: 'Objednávka #PK-2041', pts: '+73', status: 'approved' },
+  { date: '3. 3. 2026', type: 'Nákup', action: 'Objednávka #PK-1987', pts: '+59', status: 'approved' },
+  { date: '12. 1. 2026', type: 'Nákup', action: 'Objednávka #PK-1865', pts: '+198', status: 'approved' },
+  { date: '18. 4. 2026', type: 'Aktivita', action: 'Vytvoření účtu', pts: '+100', status: 'approved' },
+  { date: '1. 4. 2026', type: 'Aktivita', action: 'Recenze produktu', pts: '+50', status: 'pending' },
+];
+
+const PROFILE_TABS = ['Přehled', 'Odměny', 'Body & Historie', 'Nastavení'];
+
+const INITIAL_CART_ITEMS = [
+  { id: 1, name: 'Kompresia Cube S', variant: 'Růžová / S', price: 489, qty: 1, img: img1 },
+  { id: 2, name: 'Zip Pouch XS', variant: 'Béžová / XS', price: 241, qty: 1, img: img4 }
+];
+
 function SearchOverlay({ open, onClose, onSelectProduct, products, topProducts }) {
   const [query, setQuery] = React.useState('');
   const inputRef = React.useRef(null);
@@ -271,12 +307,12 @@ function ProductDetail({ product, onClose, onAddToCart, onSelectProduct }) {
               <line x1="16.5" y1="16.5" x2="22" y2="22" />
             </svg>
           </button>
-          <button className="nav-icon" title="Účet">
+          <a href="#profile" className="nav-icon" title="Účet" aria-label="Účet">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
               <circle cx="12" cy="8" r="4" />
               <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
             </svg>
-          </button>
+          </a>
           <button className="nav-icon cart-badge" title="Košík">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
               <path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
@@ -478,16 +514,358 @@ function ProductDetail({ product, onClose, onAddToCart, onSelectProduct }) {
   );
 }
 
-function App() {
+function ProfilePage({ cartCount = 0, onOpenCart }) {
+  const [tab, setTab] = useState(0);
+  const [toast, setToast] = useState('');
+  const [toastVisible, setToastVisible] = useState(false);
+  const [redeemedIds, setRedeemedIds] = useState([]);
+  const points = 890;
+  const [animatedPoints, setAnimatedPoints] = useState(0);
+  const tier = PROFILE_TIERS.find((t) => points >= t.min && points < t.max) || PROFILE_TIERS[PROFILE_TIERS.length - 1];
+  const tierIndex = PROFILE_TIERS.findIndex((t) => t.id === tier.id);
+  const nextTier = PROFILE_TIERS[tierIndex + 1];
+  const tierStepPct = 42;
+  const tierPosition = (index) => index * tierStepPct;
+  const tierProgressPct = (() => {
+    const currentTierIndex = PROFILE_TIERS.findIndex((t) => animatedPoints >= t.min && animatedPoints < t.max);
+    const activeTierIndex = currentTierIndex === -1 ? PROFILE_TIERS.length - 1 : currentTierIndex;
+    const activeTier = PROFILE_TIERS[activeTierIndex];
+    const segmentProgress = Math.min(1, Math.max(0, (animatedPoints - activeTier.min) / (activeTier.max - activeTier.min)));
+    return Math.min(100, tierPosition(activeTierIndex) + segmentProgress * tierStepPct);
+  })();
+
+  useEffect(() => {
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      setAnimatedPoints(points);
+      return undefined;
+    }
+
+    let frameId;
+    const duration = 900;
+    const start = performance.now();
+    const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+
+    const tick = (now) => {
+      const progress = Math.min(1, (now - start) / duration);
+      setAnimatedPoints(Math.round(points * easeOut(progress)));
+      if (progress < 1) frameId = requestAnimationFrame(tick);
+    };
+
+    frameId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameId);
+  }, [points]);
+
+  const showToast = (msg) => {
+    setToast(msg);
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 2800);
+  };
+
+  const redeem = (r) => {
+    if (!r.unlocked || redeemedIds.includes(r.id)) return;
+    setRedeemedIds((prev) => [...prev, r.id]);
+    showToast(`Odměna "${r.name}" uplatněna!`);
+  };
+
+  return (
+    <div className="profile-page">
+      <div className="ticker-wrap">
+        <div className="ticker-inner">
+          {[...Array(2)].map((_, i) => {
+            const items = ['Doprava zdarma nad 1 200 Kč', 'Nová kolekce — Léto 2026', '30 dní na vrácení bez otázek', 'Vyrobeno z recyklovaných materiálů'];
+            return (
+              <React.Fragment key={i}>
+                {items.map((text, j) => (
+                  <React.Fragment key={j}>
+                    <span className="ticker-sep" />
+                    <span>{text}</span>
+                  </React.Fragment>
+                ))}
+              </React.Fragment>
+            );
+          })}
+        </div>
+      </div>
+
+      <nav>
+        <a href="#" className="nav-logo nav-logo-tight">PACKD®</a>
+        <ul className="nav-links">
+          <li><a href="#">Kolekce</a></li>
+          <li><a href="#">Sety</a></li>
+          <li><a href="#">O nás</a></li>
+        </ul>
+        <div className="nav-actions">
+          <button className="nav-icon" title="Hledat">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <circle cx="11" cy="11" r="7" />
+              <line x1="16.5" y1="16.5" x2="22" y2="22" />
+            </svg>
+          </button>
+          <a href="#profile" className="nav-icon" title="Účet" aria-label="Účet">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+            </svg>
+          </a>
+          <button className="nav-icon cart-badge" title="Košík" onClick={onOpenCart}>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <path d="M16 10a4 4 0 01-8 0" />
+            </svg>
+            {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
+          </button>
+          <button className="burger" aria-label="Menu">
+            <span />
+            <span />
+            <span />
+          </button>
+        </div>
+      </nav>
+
+      <main className="route-content">
+        <div className="profile-hero">
+          <div className="profile-enter profile-enter-1">
+            <div className="hero-greeting">Vítej zpátky</div>
+            <div className="hero-name">Šárka<br /><em>Kandalíková</em></div>
+            <div className="hero-tier">
+              <div className="hero-tier-dot" />
+              {tier.label} — úroveň {tier.level}
+            </div>
+          </div>
+          <div className="hero-points-block profile-enter profile-enter-2">
+            <div className="hero-pts-label">bodů celkem</div>
+            <div className="hero-pts-value">{animatedPoints}</div>
+            <button className="profile-points-cta" onClick={() => setTab(1)}>
+              Uplatnit body
+              <svg className="hero-cta-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div className="tier-progress">
+          <div className="tier-progress-inner profile-enter profile-enter-3">
+            <div className="tier-track-labels">
+              {PROFILE_TIERS.map((t, i) => (
+                <span
+                  key={t.id}
+                  className={`tier-label ${t.id === tier.id ? 'active' : ''}`}
+                  style={{ left: `${tierPosition(i)}%` }}
+                >
+                  {t.label}
+                </span>
+              ))}
+            </div>
+            <div className="tier-bar">
+              <div className="tier-bar-fill" style={{ width: `${tierProgressPct}%` }} />
+              <div className="tier-bar-dots">
+                {PROFILE_TIERS.map((t, i) => (
+                  <div
+                    key={t.id}
+                    className={`tier-dot ${points >= t.min ? 'reached' : ''}`}
+                    style={{ left: `${tierPosition(i)}%` }}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="tier-hint">
+              Jsi na úrovni <strong>{tier.label}</strong>{nextTier && <> — do <strong>{nextTier.label}</strong> ti chybí <strong>{nextTier.min - points} bodů</strong></>}
+            </div>
+          </div>
+        </div>
+
+        <div className="tab-nav profile-enter profile-enter-4">
+          {PROFILE_TABS.map((t, i) => (
+            <button key={t} className={`tab-btn ${tab === i ? 'active' : ''}`} onClick={() => setTab(i)}>{t}</button>
+          ))}
+        </div>
+
+        <div className="tab-content profile-enter profile-enter-5">
+        {tab === 0 && (
+          <div>
+            <div className="overview-grid">
+              <div className="overview-card">
+                <div className="overview-card-label">Celkem bodů</div>
+                <div className="overview-card-value">{animatedPoints}</div>
+                <div className="overview-card-sub">{tier.label} úroveň</div>
+              </div>
+              <div className="overview-card">
+                <div className="overview-card-label">Objednávek</div>
+                <div className="overview-card-value">{PROFILE_ORDERS.length}</div>
+                <div className="overview-card-sub">Celkem nákupů</div>
+              </div>
+              <div className="overview-card">
+                <div className="overview-card-label">Odměny</div>
+                <div className="overview-card-value">{PROFILE_REWARDS.filter((r) => r.unlocked).length}</div>
+                <div className="overview-card-sub">K uplatnění</div>
+              </div>
+            </div>
+            <div className="section-h">Historie objednávek</div>
+            <div className="section-sub">Přehled všech tvých nákupů u PACKD.</div>
+            <table className="orders-table">
+              <thead>
+                <tr>
+                  <th>Objednávka</th>
+                  <th>Produkty</th>
+                  <th>Datum</th>
+                  <th>Celkem</th>
+                  <th>Body</th>
+                  <th>Stav</th>
+                </tr>
+              </thead>
+              <tbody>
+                {PROFILE_ORDERS.map((o) => (
+                  <tr key={o.id}>
+                    <td style={{ fontWeight: 500, letterSpacing: 0 }}>{o.id}</td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        {o.items.map((item, i) => <span key={i} style={{ fontSize: 11.5, letterSpacing: 0 }}>{item}</span>)}
+                        <div className="order-imgs" style={{ marginTop: 6 }}>
+                          {o.imgs.map((img, i) => (
+                            <div className="order-img" key={i}><img src={img} alt="" /></div>
+                          ))}
+                        </div>
+                      </div>
+                    </td>
+                    <td style={{ color: 'var(--ink-soft)' }}>{o.date}</td>
+                    <td>{o.total}</td>
+                    <td><span className="pts-badge plus">+{o.pts}</span></td>
+                    <td><span className={`order-status ${o.status}`}>{o.status === 'delivered' ? 'Doručeno' : 'Odesláno'}</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {tab === 1 && (
+          <div>
+            <div className="section-h">Odměny</div>
+            <div className="section-sub">Uplatni nasbírané body za exkluzivní odměny. Odemkni vyšší úrovně a získej přístup k lepším benefitům.</div>
+            <div className="rewards-grid">
+              {PROFILE_REWARDS.map((r) => {
+                const redeemed = redeemedIds.includes(r.id);
+                return (
+                  <div className={`reward-card ${!r.unlocked ? 'locked' : ''}`} key={r.id}>
+                    <div className="reward-img">
+                      <img src={r.img} alt={r.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: !r.unlocked ? 'grayscale(40%) brightness(1.1)' : 'none', transition: 'filter .3s' }} />
+                      {!r.unlocked && (
+                        <div className="reward-lock-overlay">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity=".4">
+                            <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
+                          </svg>
+                          <span>{r.pts} bodů</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="reward-info">
+                      <div>
+                        <div className="reward-info-name">{r.name}</div>
+                        <div className="reward-info-pts">{r.pts} bodů</div>
+                      </div>
+                      {r.unlocked ? (
+                        <button className={`reward-btn ${redeemed ? 'locked-btn' : ''}`} onClick={() => redeem(r)}>
+                          {redeemed ? '✓ Uplatněno' : 'Uplatnit'}
+                        </button>
+                      ) : (
+                        <button className="reward-btn locked-btn">Uzamčeno</button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {tab === 2 && (
+          <div>
+            <div className="profile-points-heading">
+              <div className="section-h">Body & Historie</div>
+              <div>Celkem: <strong>{animatedPoints} bodů</strong></div>
+            </div>
+            <div className="profile-earn-title">Jak získávat body</div>
+            <div className="profile-earn-grid">
+              {[
+                { action: 'Každý nákup', pts: '1 bod / 10 Kč' },
+                { action: 'Recenze produktu', pts: '50 bodů' },
+                { action: 'Přihlášení k newsletteru', pts: '100 bodů' },
+              ].map((r) => (
+                <div className="profile-earn-card" key={r.action}>
+                  <div>{r.action}</div>
+                  <span>{r.pts}</span>
+                </div>
+              ))}
+            </div>
+            <div className="section-h" style={{ marginBottom: 6 }}>Transakce</div>
+            <div className="section-sub">Kompletní přehled pohybu bodů na tvém účtu.</div>
+            <table className="history-table">
+              <thead>
+                <tr>
+                  <th>Datum</th>
+                  <th>Typ</th>
+                  <th>Akce</th>
+                  <th>Body</th>
+                  <th>Stav</th>
+                </tr>
+              </thead>
+              <tbody>
+                {PROFILE_HISTORY.map((h, i) => (
+                  <tr key={i}>
+                    <td style={{ color: 'var(--ink-soft)' }}>{h.date}</td>
+                    <td>{h.type}</td>
+                    <td>{h.action}</td>
+                    <td><span className={`pts-badge ${h.status === 'pending' ? 'pending' : 'plus'}`}>{h.pts}</span></td>
+                    <td><span className={`hist-status ${h.status}`}>{h.status === 'approved' ? 'Schváleno' : 'Čeká'}</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {tab === 3 && (
+          <div>
+            <div className="section-h">Nastavení účtu</div>
+            <div className="section-sub">Upravte své osobní údaje a preference.</div>
+            <div className="settings-grid">
+              <div className="settings-field">
+                <label className="settings-label">Jméno</label>
+                <input className="settings-input" defaultValue="Šárka" />
+              </div>
+              <div className="settings-field">
+                <label className="settings-label">Příjmení</label>
+                <input className="settings-input" defaultValue="Kandalíková" />
+              </div>
+              <div className="settings-field">
+                <label className="settings-label">E-mail</label>
+                <input className="settings-input" defaultValue="sarka.kandalikova@email.cz" type="email" />
+              </div>
+              <div className="settings-field">
+                <label className="settings-label">Telefon</label>
+                <input className="settings-input" defaultValue="+420 777 123 456" />
+              </div>
+            </div>
+            <button className="settings-save" onClick={() => showToast('Změny byly uloženy.')}>Uložit změny</button>
+            <br />
+            <button className="logout-btn" onClick={() => { window.location.hash = ''; }}>Odhlásit se</button>
+          </div>
+        )}
+        </div>
+      </main>
+
+      <div className={`profile-toast ${toastVisible ? 'show' : ''}`}>{toast}</div>
+    </div>
+  );
+}
+
+function HomePage({ cartItems, setCartItems, cartCount, setCartCount, cartOpen, setCartOpen }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [cartOpen, setCartOpen] = useState(false);
-  const [cartItems, setCartItems] = useState([
-    { id: 1, name: 'Kompresia Cube S', variant: 'Růžová / S', price: 489, qty: 1, img: img1 },
-    { id: 2, name: 'Zip Pouch XS', variant: 'Béžová / XS', price: 241, qty: 1, img: img4 }
-  ]);
-  const [cartCount, setCartCount] = useState(2);
   const [nlName, setNlName] = useState('');
   const [nlEmail, setNlEmail] = useState('');
   const [nlDone, setNlDone] = useState(false);
@@ -616,8 +994,11 @@ function App() {
   };
 
   const removeFromCart = (id) => {
-    setCartItems((prev) => prev.filter((i) => i.id !== id));
-    setCartCount((c) => Math.max(0, c - 1));
+    setCartItems((prev) => {
+      const item = prev.find((i) => i.id === id);
+      if (item) setCartCount((c) => Math.max(0, c - item.qty));
+      return prev.filter((i) => i.id !== id);
+    });
   };
 
   const openCartItemDetail = (id) => {
@@ -721,12 +1102,12 @@ function App() {
               <line x1="16.5" y1="16.5" x2="22" y2="22" />
             </svg>
           </button>
-          <button className="nav-icon" title="Účet">
+          <a href="#profile" className="nav-icon" title="Účet" aria-label="Účet">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
               <circle cx="12" cy="8" r="4" />
               <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
             </svg>
-          </button>
+          </a>
           <button className="nav-icon cart-badge" title="Košík" onClick={() => setCartOpen(true)}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
               <path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
@@ -749,7 +1130,8 @@ function App() {
         ))}
       </div>
 
-      <div className="hero">
+      <main className="route-content">
+        <div className="hero">
         <div className="hero-media" style={{ backgroundImage: `url(${imgHero})` }} />
         <div className="hero-overlay" />
         <div className="hero-season hero-fade-in">SS26 — Léto</div>
@@ -763,7 +1145,7 @@ function App() {
           </h1>
           <a href="#new-arrivals" className="hero-cta">
             Zobrazit novinky
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <svg className="hero-cta-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
               <line x1="5" y1="12" x2="19" y2="12" />
               <polyline points="12 5 19 12 12 19" />
             </svg>
@@ -966,6 +1348,7 @@ function App() {
           <span>Ochrana osobních údajů · Obchodní podmínky</span>
         </div>
       </footer>
+      </main>
 
       <div className={`cart-overlay ${cartOpen ? 'open' : ''}`} onClick={() => setCartOpen(false)} />
       <div className={`cart-drawer ${cartOpen ? 'open' : ''}`}>
@@ -1113,6 +1496,49 @@ function App() {
         topProducts={topProducts}
       />
     </>
+  );
+}
+
+function App() {
+  const getRoute = () => (window.location.hash === '#profile' ? 'profile' : 'home');
+  const [route, setRoute] = useState(getRoute);
+  const [cartItems, setCartItems] = useState(INITIAL_CART_ITEMS);
+  const [cartCount, setCartCount] = useState(INITIAL_CART_ITEMS.reduce((sum, item) => sum + item.qty, 0));
+  const [cartOpen, setCartOpen] = useState(false);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const nextRoute = getRoute();
+
+      if (document.startViewTransition) {
+        document.startViewTransition(() => setRoute(nextRoute));
+        return;
+      }
+
+      setRoute(nextRoute);
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  return route === 'profile' ? (
+    <ProfilePage
+      cartCount={cartCount}
+      onOpenCart={() => {
+        setCartOpen(true);
+        window.location.hash = '';
+      }}
+    />
+  ) : (
+    <HomePage
+      cartItems={cartItems}
+      setCartItems={setCartItems}
+      cartCount={cartCount}
+      setCartCount={setCartCount}
+      cartOpen={cartOpen}
+      setCartOpen={setCartOpen}
+    />
   );
 }
 

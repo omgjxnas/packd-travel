@@ -13,6 +13,25 @@ const img4 = 'uploads/cube-brown-1-slim.jpeg';
 const img5 = 'uploads/cube-brown-2-packed.jpeg';
 const img6 = 'uploads/cube-brown-3-suitcase.jpeg';
 const imgHero = 'uploads/hero-brown-lifestyle.jpeg';
+const imgClassicVanilla = 'uploads/vanilla-set.png';
+const imgClassicOlive = 'uploads/olive-set.png';
+const imgClassicBlue = 'uploads/blue-set.png';
+const imgClassicPink = 'uploads/pink-set.png';
+const imgCheckerBurgundy = 'uploads/set-checekr-burgundi.png';
+const imgCheckerYellow = 'uploads/set-checker-yellow.png';
+const imgCheckerBlue = 'uploads/set-checker-blue.png';
+const imgBagVanilla = 'uploads/bag-vanilla.png';
+const imgBagBrown = 'uploads/bag-brown.png';
+const imgBagMatcha = 'uploads/bag-matcha.png';
+const imgGymBagVanilla = 'uploads/bag-gym-vanilla.png';
+const imgGymBagBrown = 'uploads/bag-gym-brown.png';
+
+const DEFAULT_COLORS = [
+  { label: 'Růžová', value: 'oklch(82% 0.09 10)', imageIndex: 0 },
+  { label: 'Hnědá', value: 'oklch(42% 0.05 40)', imageIndex: 1 }
+];
+
+const parsePrice = (price) => Number(String(price).replace(/[^\d]/g, '')) || 0;
 
 function useOverlayFocus(isOpen, focusRef) {
   const lastFocusedRef = React.useRef(null);
@@ -117,10 +136,66 @@ function CarouselImg({ imgs }) {
 }
 
 const products = [
-  { id: 1, name: 'Kompresia Cube S', price: '489 Kč', tag: 'NOVINKA', sizes: ['XS', 'S', 'M'], imgs: [img1, img2, img3] },
-  { id: 2, name: 'Mesh Cube M', price: '589 Kč', tag: 'NOVINKA', sizes: ['S', 'M', 'L'], imgs: [img2, img3, img1] },
-  { id: 3, name: 'Slim Cube L', price: '689 Kč', tag: 'NOVINKA', sizes: ['M', 'L', 'XL'], imgs: [img4, img5] },
-  { id: 4, name: 'Cestovní set 3-pack', price: '1 290 Kč', tag: 'BESTSELLER', sizes: ['S', 'M', 'L'], imgs: [img6, img5, img4] }
+  {
+    id: 9,
+    name: 'Checker Travel Set',
+    price: '1 129 Kč',
+    tag: 'NOVINKA',
+    sizes: ['3 ks', 'S', 'M', 'L'],
+    imgs: [imgCheckerBlue, imgCheckerBurgundy, imgCheckerYellow],
+    colors: [
+      { label: 'Sky checker', value: 'oklch(72% 0.10 230)', imageIndex: 0 },
+      { label: 'Burgundy checker', value: 'oklch(38% 0.12 25)', imageIndex: 1 },
+      { label: 'Sun checker', value: 'oklch(86% 0.12 86)', imageIndex: 2 }
+    ],
+    detail: 'Lehký tříkusový packing set s výrazným checker vzorem. Každý cube má hladký zip, průhlednější síťovanou horní část a pevný tvar, takže se v kufru rychle orientuješ i po delším přesunu.',
+    sizeGuide: 'Set obsahuje S, M a L cube pro spodní prádlo, trička i objemnější vrstvy. Ideální pro víkend i týdenní cestu.'
+  },
+  {
+    id: 10,
+    name: 'Classic Packing Set',
+    price: '1 349 Kč',
+    tag: 'NOVINKA',
+    sizes: ['4 ks', 'XS', 'S', 'M', 'L'],
+    imgs: [imgClassicPink, imgClassicVanilla, imgClassicOlive, imgClassicBlue],
+    colors: [
+      { label: 'Pink', value: 'oklch(82% 0.10 12)', imageIndex: 0 },
+      { label: 'Vanilla', value: 'oklch(92% 0.03 82)', imageIndex: 1 },
+      { label: 'Olive', value: 'oklch(52% 0.07 125)', imageIndex: 2 },
+      { label: 'Blue', value: 'oklch(55% 0.09 235)', imageIndex: 3 }
+    ],
+    detail: 'Čistý PACKD set pro každodenní cestování. Čtyři velikosti drží outfity oddělené, šetří místo v zavazadle a díky měkkému ripstop materiálu se snadno přizpůsobí obsahu.',
+    sizeGuide: 'Set obsahuje XS, S, M a L cube. XS se hodí na drobnosti, S na prádlo, M na trička a L na kalhoty nebo mikinu.'
+  },
+  {
+    id: 11,
+    name: 'Classic Weekender Bag',
+    price: '2 799 Kč',
+    tag: 'NOVINKA',
+    sizes: ['28 l', 'Cabin'],
+    imgs: [imgBagVanilla, imgBagBrown, imgBagMatcha],
+    colors: [
+      { label: 'Vanilla', value: 'oklch(92% 0.03 82)', imageIndex: 0 },
+      { label: 'Cocoa', value: 'oklch(42% 0.05 42)', imageIndex: 1 },
+      { label: 'Matcha', value: 'oklch(61% 0.07 130)', imageIndex: 2 }
+    ],
+    detail: 'Minimalistická cestovní taška s prostorem na víkend, trénink i carry-on přesun. Pevné madlo, měkký objem a kapsy navržené tak, aby dobře fungovaly s PACKD cubes.',
+    sizeGuide: 'Objem 28 l. Vejde se jako víkendová taška nebo kabinové zavazadlo na krátké cesty.'
+  },
+  {
+    id: 12,
+    name: 'Everyday Gym Bag',
+    price: '1 899 Kč',
+    tag: 'NOVINKA',
+    sizes: ['18 l', 'Gym'],
+    imgs: [imgGymBagBrown, imgGymBagVanilla],
+    colors: [
+      { label: 'Cocoa', value: 'oklch(42% 0.05 42)', imageIndex: 0 },
+      { label: 'Vanilla', value: 'oklch(92% 0.03 82)', imageIndex: 1 }
+    ],
+    detail: 'Kompaktní gym bag na trénink, práci i krátké městské přesuny. Drží čistý tvar, má dost místa na boty, oblečení a lahev, a zůstává lehký i ve chvíli, kdy ho bereš každý den.',
+    sizeGuide: 'Objem 18 l. Vhodný na gym essentials, ručník, tenisky a jednu sadu oblečení. Rozměrově sedí pod rameno i do šatní skříňky.'
+  }
 ];
 
 const topProducts = [
@@ -162,8 +237,8 @@ const PROFILE_HISTORY = [
 const PROFILE_TABS = ['Přehled', 'Odměny', 'Body & Historie', 'Nastavení'];
 
 const INITIAL_CART_ITEMS = [
-  { id: 1, name: 'Kompresia Cube S', variant: 'Růžová / S', price: 489, qty: 1, img: img1 },
-  { id: 2, name: 'Zip Pouch XS', variant: 'Béžová / XS', price: 241, qty: 1, img: img4 }
+  { id: 10, name: 'Classic Packing Set', variant: 'Vanilla', price: 1349, qty: 1, img: imgClassicVanilla },
+  { id: 11, name: 'Classic Weekender Bag', variant: 'Cocoa', price: 2799, qty: 1, img: imgBagBrown }
 ];
 
 function SearchOverlay({ open, onClose, onSelectProduct, products, topProducts }) {
@@ -182,8 +257,8 @@ function SearchOverlay({ open, onClose, onSelectProduct, products, topProducts }
   const allProducts = [...products, ...topProducts];
   const q = query.toLowerCase().trim();
   const results = q ? allProducts.filter((p) => p.name.toLowerCase().includes(q)) : [];
-  const cats = ['Novinky', 'Kompresia', 'Mesh', 'Slim', 'Sety', 'XL Cubes', 'Doplňky'];
-  const trending = ['Packing cube set', 'Kompresia cube', 'Travel sada', 'Slim cube béžový', 'Mesh cube'];
+  const cats = ['Novinky', 'Kompresia', 'Mesh', 'Slim', 'Sety', 'Tašky', 'Doplňky'];
+  const trending = ['Classic Weekender Bag', 'Everyday Gym Bag', 'Packing cube set', 'Checker Travel Set', 'Classic Packing Set'];
 
   return (
     <div className={`search-overlay ${open ? 'open' : ''}`}>
@@ -280,15 +355,13 @@ function ProductDetail({ product, onClose, onAddToCart, onSelectProduct }) {
   const sizes = product.sizes || ['XS', 'S', 'M', 'L', 'XL'];
   const unavail = ['XL'];
   const relatedProducts = [...products, ...topProducts].filter((p) => p.id !== product.id).slice(0, 4);
-  const colorSwatches = [
-    { label: 'Růžová', value: 'oklch(82% 0.09 10)' },
-    { label: 'Hnědá', value: 'oklch(42% 0.05 40)' }
-  ];
+  const colorSwatches = product.colors || DEFAULT_COLORS;
+  const activeColor = colorSwatches.find((swatch) => swatch.imageIndex === imgIdx) || colorSwatches[0];
 
   const accordions = [
-    { id: 'details', label: 'Detail produktu', content: `Prémiový packing cube vyrobený z lehkého ripstop nylonu. Dvojitý kompresní zip umožňuje maximální využití prostoru. Integrovaná síťovaná kapsa pro snadný přehled obsahu. Model ${product.name}.` },
+    { id: 'details', label: 'Detail produktu', content: product.detail || `Prémiový packing cube vyrobený z lehkého ripstop nylonu. Dvojitý kompresní zip umožňuje maximální využití prostoru. Integrovaná síťovaná kapsa pro snadný přehled obsahu. Model ${product.name}.` },
     { id: 'shipping', label: 'Doprava & vrácení', content: 'Standardní doprava 2–4 pracovní dny. Expresní doprava 1–2 pracovní dny. Vrácení zboží do 30 dní bez udání důvodu. Doprava zdarma nad 1 200 Kč.' },
-    { id: 'sizeguide', label: 'Průvodce velikostmi', content: 'S: 30×20×8 cm · M: 38×26×10 cm · L: 46×32×12 cm · XL: 54×38×14 cm. Doporučujeme vybrat o velikost větší pro kompresi oblečení.' }
+    { id: 'sizeguide', label: 'Průvodce velikostmi', content: product.sizeGuide || 'S: 30×20×8 cm · M: 38×26×10 cm · L: 46×32×12 cm · XL: 54×38×14 cm. Doporučujeme vybrat o velikost větší pro kompresi oblečení.' }
   ];
 
   return (
@@ -379,13 +452,13 @@ function ProductDetail({ product, onClose, onAddToCart, onSelectProduct }) {
             <div className="pd-info-top">
               <div className="pd-name">{product.name}</div>
               <div className="pd-price">{product.price}</div>
-              <div className="pd-section-label">Barva</div>
+              <div className="pd-section-label">Barva{activeColor ? ` — ${activeColor.label}` : ''}</div>
               <div className="pd-colors">
-                {colorSwatches.map((swatch, i) => (
+                {colorSwatches.map((swatch) => (
                   <div
                     key={swatch.label}
-                    className={`pd-color-swatch ${imgIdx === i ? 'active' : ''}`}
-                    onClick={() => setImgIdx(i)}
+                    className={`pd-color-swatch ${imgIdx === swatch.imageIndex ? 'active' : ''}`}
+                    onClick={() => setImgIdx(swatch.imageIndex)}
                     aria-label={swatch.label}
                     title={swatch.label}
                   >
@@ -790,13 +863,21 @@ function ProfilePage({ cartCount = 0, onOpenCart }) {
             <div className="profile-earn-title">Jak získávat body</div>
             <div className="profile-earn-grid">
               {[
-                { action: 'Každý nákup', pts: '1 bod / 10 Kč' },
-                { action: 'Recenze produktu', pts: '50 bodů' },
-                { action: 'Přihlášení k newsletteru', pts: '100 bodů' },
+                { action: 'Každý nákup', pts: '1 bod / 10 Kč', desc: 'Za každou dokončenou objednávku' },
+                { action: 'Recenze produktu', pts: '50 bodů', desc: 'Po ověřeném nákupu', cta: 'Napsat recenzi' },
+                { action: 'Přihlášení k newsletteru', pts: '100 bodů', desc: 'Jednorázový bonus na účet', cta: 'Odebírat' },
               ].map((r) => (
                 <div className="profile-earn-card" key={r.action}>
-                  <div>{r.action}</div>
-                  <span>{r.pts}</span>
+                  <div className="profile-earn-card-copy">
+                    <div className="profile-earn-card-label">{r.action}</div>
+                    <div className="profile-earn-card-value">{r.pts}</div>
+                    <div className="profile-earn-card-sub">{r.desc}</div>
+                  </div>
+                  {r.cta && (
+                    <div className="profile-earn-card-action">
+                      <button className="profile-earn-card-btn">{r.cta}</button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -978,7 +1059,8 @@ function HomePage({ cartItems, setCartItems, cartCount, setCartCount, cartOpen, 
     setCartItems((prev) => {
       const ex = prev.find((i) => i.id === id);
       if (ex) return prev.map((i) => i.id === id ? { ...i, qty: i.qty + 1 } : i);
-      return [...prev, { id: p.id, name: p.name, variant: 'Standardní', price: parseInt(p.price), qty: 1, img: p.imgs[0] }];
+      const variant = p.colors?.[0]?.label || 'Standardní';
+      return [...prev, { id: p.id, name: p.name, variant, price: parsePrice(p.price), qty: 1, img: p.imgs[0] }];
     });
     setCartCount((c) => c + 1);
     setAddedId(id);
@@ -1052,7 +1134,7 @@ function HomePage({ cartItems, setCartItems, cartCount, setCartCount, cartOpen, 
           ))}
         </ul>
         <div className="mobile-menu-sub">
-          {['Novinky', 'Sety', 'Kompresia', 'Mesh', 'XL Cubes', 'Slim', 'Doplňky'].map((l) => (
+          {['Novinky', 'Sety', 'Kompresia', 'Mesh', 'Tašky', 'Slim', 'Doplňky'].map((l) => (
             <a href="#" key={l} onClick={() => setMenuOpen(false)}>{l}</a>
           ))}
         </div>
@@ -1118,7 +1200,7 @@ function HomePage({ cartItems, setCartItems, cartCount, setCartCount, cartOpen, 
       </nav>
 
       <div className="subnav">
-        {['Novinky', 'Sety', 'Kompresia', 'Mesh', 'XL Cubes', 'Slim', 'Doplňky'].map((l, i) => (
+        {['Novinky', 'Sety', 'Kompresia', 'Mesh', 'Tašky', 'Slim', 'Doplňky'].map((l, i) => (
           <a key={l} href="#" className={i === 0 ? 'active' : ''}>{l}</a>
         ))}
       </div>
@@ -1212,9 +1294,6 @@ function HomePage({ cartItems, setCartItems, cartCount, setCartCount, cartOpen, 
               <div className="product-info">
                 <div className="product-name">{p.name}</div>
                 <div className="product-price">{p.price}</div>
-                <div className="product-sizes">
-                  {p.sizes.map((s) => <span className="size-dot" key={s}>{s}</span>)}
-                </div>
               </div>
             </div>
           ))}

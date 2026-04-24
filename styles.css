@@ -918,7 +918,7 @@
   .product-info {
     padding: 14px 4px 6px;
     position: relative;
-    height: 56px;
+    min-height: 56px;
     overflow: visible;
   }
   .product-name {
@@ -932,19 +932,6 @@
     font-weight: 300;
     color: var(--ink-soft);
     letter-spacing: -0.5px;
-  }
-  .product-sizes {
-    display: none;
-    gap: 6px;
-    margin-top: 4px;
-    position: absolute;
-    left: 4px;
-  }
-  .product-card:hover .product-sizes { display: flex; }
-  .size-dot {
-    font-size: 9.5px;
-    letter-spacing: 0;
-    color: var(--ink-soft);
   }
 
   /* Hover overlay */
@@ -1085,9 +1072,9 @@
     letter-spacing: 0;
     opacity: .5;
     line-height: 1.5;
-    max-width: 200px;
+    white-space: nowrap;
   }
-  .feature-desc-carousel { font-size: 12px; opacity: .5; letter-spacing: 0; line-height: 1.5; }
+  .feature-desc-carousel { font-size: 12px; opacity: .5; letter-spacing: 0; line-height: 1.5; white-space: normal; }
 
   /* Newsletter */
   .newsletter {
@@ -2226,26 +2213,77 @@
   .profile-earn-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 2px;
+    gap: 0;
     margin-bottom: 40px;
+    background: var(--profile-vanilla);
+    color: var(--profile-brown);
   }
 
   .profile-earn-card {
-    background: oklch(95% 0.006 60);
-    padding: 20px 18px;
+    padding: 28px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    border-right: 1px solid oklch(18% 0.02 55 / 0.14);
   }
 
-  .profile-earn-card div {
-    font-size: 12.5px;
-    font-weight: 400;
-    letter-spacing: -0.3px;
-    margin-bottom: 4px;
+  .profile-earn-card:last-child { border-right: none; }
+
+  .profile-earn-card-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
   }
 
-  .profile-earn-card span {
+  .profile-earn-card-label {
     font-size: 11px;
-    color: var(--ink-soft);
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: .55;
+  }
+
+  .profile-earn-card-value {
+    font-size: 32px;
+    font-weight: 500;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+  }
+
+  .profile-earn-card-sub {
+    font-size: 12px;
+    font-weight: 300;
     letter-spacing: 0;
+    opacity: .58;
+    line-height: 1.5;
+  }
+
+  .profile-earn-card-action {
+    display: flex;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+  }
+
+  .profile-earn-card-btn {
+    background: transparent;
+    border: 1px solid oklch(18% 0.02 55 / .42);
+    color: var(--profile-brown);
+    cursor: pointer;
+    font-family: var(--font);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 10px 16px;
+    transition: background-color .18s, border-color .18s, color .18s;
+  }
+
+  .profile-earn-card-btn:hover {
+    background: var(--profile-brown);
+    border-color: var(--profile-brown);
+    color: var(--profile-white);
   }
 
   .settings-grid {
@@ -2363,11 +2401,13 @@
     }
     .overview-grid,
     .profile-earn-grid { grid-template-columns: 1fr 1fr; }
-    .overview-card {
+    .overview-card,
+    .profile-earn-card {
       padding: 24px 20px;
       border-right: 1px solid oklch(18% 0.02 55 / 0.14);
     }
-    .overview-card:nth-child(2n) { border-right: none; }
+    .overview-card:nth-child(2n),
+    .profile-earn-card:nth-child(2n) { border-right: none; }
     .settings-grid { grid-template-columns: 1fr; }
     .orders-table th:nth-child(3),
     .orders-table td:nth-child(3) { display: none; }

@@ -1375,56 +1375,6 @@
     padding: 36px 26px 32px;
     display: flex; flex-direction: column; gap: 10px;
   }
-  .nl-popup-code {
-    font-size: 24px; font-weight: 600; letter-spacing: 3px;
-    background: oklch(20% 0.01 50);
-    padding: 14px;
-    text-align: center;
-    cursor: pointer;
-    user-select: none;
-    position: relative;
-    overflow: hidden;
-    margin: 8px 0;
-    transition: background .3s;
-  }
-  .nl-popup-code:hover { background: oklch(23% 0.01 50); }
-  .nl-popup-code.copied {
-    background: oklch(20% 0.01 50);
-  }
-  .nl-popup-code .code-label,
-  .nl-popup-code .code-check {
-    display: block;
-    transition: transform .35s cubic-bezier(.22,1,.36,1), opacity .3s;
-    position: absolute;
-    width: 100%;
-    left: 0;
-  }
-  .nl-popup-code .code-label { position: relative; }
-  .nl-popup-code.copied .code-label { transform: translateY(-120%); opacity: 0; }
-  .nl-popup-code .code-check {
-    top: 50%; transform: translateY(calc(-50% + 30px));
-    opacity: 0;
-    font-size: 15px;
-    letter-spacing: 0.1em;
-    font-weight: 500;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-  .nl-popup-code.copied .code-check {
-    transform: translateY(-50%);
-    opacity: 1;
-  }
-  .nl-popup-code .code-check .material-symbols-outlined {
-    font-size: 18px;
-    line-height: 1;
-    font-variation-settings:
-      'FILL' 1,
-      'wght' 500,
-      'GRAD' 0,
-      'opsz' 20;
-  }
   .nl-popup-tab {
     position: fixed;
     bottom: 28px;
@@ -2206,36 +2156,43 @@
   .overview-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 2px;
+    gap: 0;
     margin-bottom: 40px;
+    background: var(--profile-vanilla);
+    color: var(--profile-brown);
   }
 
   .overview-card {
-    background: oklch(95% 0.006 60);
     padding: 28px 24px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 10px;
+    border-right: 1px solid oklch(18% 0.02 55 / 0.14);
   }
 
+  .overview-card:last-child { border-right: none; }
+
   .overview-card-label {
-    font-size: 9.5px;
-    font-weight: 600;
-    letter-spacing: 0.12em;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--ink-soft);
+    opacity: .55;
   }
 
   .overview-card-value {
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 500;
-    letter-spacing: -2px;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
   }
 
   .overview-card-sub {
-    font-size: 11px;
+    font-size: 12px;
+    font-weight: 300;
     letter-spacing: 0;
-    color: var(--ink-soft);
+    opacity: .58;
+    line-height: 1.5;
   }
 
   .profile-points-heading {
@@ -2406,6 +2363,11 @@
     }
     .overview-grid,
     .profile-earn-grid { grid-template-columns: 1fr 1fr; }
+    .overview-card {
+      padding: 24px 20px;
+      border-right: 1px solid oklch(18% 0.02 55 / 0.14);
+    }
+    .overview-card:nth-child(2n) { border-right: none; }
     .settings-grid { grid-template-columns: 1fr; }
     .orders-table th:nth-child(3),
     .orders-table td:nth-child(3) { display: none; }

@@ -873,7 +873,6 @@ function HomePage({ cartItems, setCartItems, cartCount, setCartCount, cartOpen, 
   const [addedId, setAddedId] = useState(null);
   const [popupOpen, setPopupOpen] = useState(false);
   const [tabVisible, setTabVisible] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [popupEmail, setPopupEmail] = useState('');
   const [popupDone, setPopupDone] = useState(false);
   const menuCloseRef = React.useRef(null);
@@ -971,12 +970,6 @@ function HomePage({ cartItems, setCartItems, cartCount, setCartCount, cartOpen, 
   const handlePopup = (e) => {
     e.preventDefault();
     if (popupEmail) setPopupDone(true);
-  };
-
-  const copyCode = () => {
-    navigator.clipboard?.writeText('PACKD10');
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2200);
   };
 
   const addToCart = (id) => {
@@ -1254,7 +1247,7 @@ function HomePage({ cartItems, setCartItems, cartCount, setCartCount, cartOpen, 
 
       <div id="newsletter" className="newsletter reveal" data-reveal>
         <div className="reveal" data-reveal style={{ '--reveal-delay': '40ms' }}>
-          <h2 className="nl-title">Zůstaň<br />v <em>obraze.</em></h2>
+          <h2 className="nl-title"><em>Zůstaň<br />v</em> obraze.</h2>
           <p className="nl-sub">Nové kolekce, exkluzivní nabídky a tipy na chytré cestování. Žádný spam — slibujeme.</p>
         </div>
         <div className="reveal" data-reveal style={{ '--reveal-delay': '120ms' }}>
@@ -1458,17 +1451,9 @@ function HomePage({ cartItems, setCartItems, cartCount, setCartCount, cartOpen, 
           </div>
         ) : (
           <div className="nl-popup-success">
-            <div className="nl-popup-eyebrow">Tvůj kód je připraven 🎉</div>
+            <div className="nl-popup-eyebrow">Kód jsme poslali e-mailem</div>
             <div className="nl-popup-title">Díky!</div>
-            <p className="nl-popup-sub nl-popup-subtle">Zkopíruj kód a použij ho při pokladně.</p>
-            <div className={`nl-popup-code ${copied ? 'copied' : ''}`} onClick={copyCode}>
-              <span className="code-label">PACKD10</span>
-              <span className="code-check">
-                <span className="material-symbols-outlined" aria-hidden="true">check</span>
-                <span>Zkopírováno</span>
-              </span>
-            </div>
-            <p className="nl-popup-note nl-popup-note-fade" style={{ opacity: copied ? 0 : 1 }}>Klikni pro zkopírování</p>
+            <p className="nl-popup-sub nl-popup-subtle">Na zadanou adresu jsme poslali slevový kód. Můžeš ho použít na další objednávku.</p>
             <button className="nl-popup-btn nl-popup-btn-spaced" onClick={closePopup}>Jít nakupovat</button>
           </div>
         )}
